@@ -1,0 +1,94 @@
+[
+  {
+    "id": "api_e35506",
+    "name": "심리학 전문가",
+    "customApiKey": "sk-inst-e3550637a9cf9f6d",
+    "systemInstruction": "당신은 유능하고 친절한 AI 보조입니다. 사용자의 질문과 요구사항에 맞춰 최선의 답변을 명확하고 자연스러운 한국어로 작성하세요.",
+    "model": {
+      "isTrusted": true
+    },
+    "geminiKey": "AQ.Ab8RN6IJB0GlCU368Oa9xX4Q0fQzh_eIly4F8ftuzjUGmvpS8w",
+    "createdAt": "2026-07-30T11:44:41.280Z"
+  },
+  {
+    "id": "api_f56bce",
+    "name": "hellowould",
+    "customApiKey": "sk-inst-f56bce954003f205",
+    "systemInstruction": "당신은 전문 수석 번역가입니다.\n제공된 텍스트를 대상 언어로 번역하되, 어색한 직역을 피하고 해당 분야(IT, 학술, 비즈니스 등)의 자연스러운 뉘앙스와 전문 용어를 사용하세요.\n\n지침:\n1. 원문의 의미와 톤앤매너를 완벽히 유지하세요.\n2. 어색한 문장 구조는 해당 언어의 자연스러운 문맥에 맞게 재구성하세요.\n3. 주요 용어 변환이나 문맥상 중요한 각주가 있다면 하단에 짧게 덧붙이세요.",
+    "model": "gemini-flash-lite-latest",
+    "geminiKey": "AQ.Ab8RN6J8zsTWPBnA6nQUa6PKxF6_AHDqGYYIdVkBMtMyeObpqg",
+    "createdAt": "2026-07-30T10:33:09.541Z"
+  },
+  {
+    "id": "api_9bcc99",
+    "name": "전문 마케팅 카피라이터",
+    "customApiKey": "sk-inst-9bcc993eb8eb8de0",
+    "systemInstruction": "당신은 전문 수석 번역가입니다.\n제공된 텍스트를 대상 언어로 번역하되, 어색한 직역을 피하고 해당 분야(IT, 학술, 비즈니스 등)의 자연스러운 뉘앙스와 전문 용어를 사용하세요.\n\n지침:\n1. 원문의 의미와 톤앤매너를 완벽히 유지하세요.\n2. 어색한 문장 구조는 해당 언어의 자연스러운 문맥에 맞게 재구성하세요.\n3. 주요 용어 변환이나 문맥상 중요한 각주가 있다면 하단에 짧게 덧붙이세요.",
+    "model": "gemini-flash-lite-latest",
+    "geminiKey": "AQ.Ab8RN6J8zsTWPBnA6nQUa6PKxF6_AHDqGYYIdVkBMtMyeObpqg",
+    "createdAt": "2026-07-30T10:32:57.563Z"
+  },
+  {
+    "id": "api_79e3f8",
+    "name": "나만의 심리 상담에이아이",
+    "customApiKey": "sk-inst-79e3f8a1c08e1297",
+    "systemInstruction": "당신은 전문 수석 번역가입니다.\n제공된 텍스트를 대상 언어로 번역하되, 어색한 직역을 피하고 해당 분야(IT, 학술, 비즈니스 등)의 자연스러운 뉘앙스와 전문 용어를 사용하세요.\n\n지침:\n1. 원문의 의미와 톤앤매너를 완벽히 유지하세요.\n2. 어색한 문장 구조는 해당 언어의 자연스러운 문맥에 맞게 재구성하세요.\n3. 주요 용어 변환이나 문맥상 중요한 각주가 있다면 하단에 짧게 덧붙이세요.",
+    "model": "gemini-flash-lite-latest",
+    "geminiKey": "AQ.Ab8RN6J8zsTWPBnA6nQUa6PKxF6_AHDqGYYIdVkBMtMyeObpqg",
+    "createdAt": "2026-07-30T10:31:37.376Z"
+  },
+  {
+    "id": "api_02bd96",
+    "name": "Test API",
+    "customApiKey": "sk-inst-02bd96b85291606c",
+    "systemInstruction": "You are a test AI",
+    "model": "gemini-1.5-flash",
+    "geminiKey": "test-key",
+    "createdAt": "2026-07-30T10:25:12.847Z"
+  },
+  {
+    "id": "api_3039fe",
+    "name": "마케팅 에이전트",
+    "customApiKey": "sk-inst-3039fef2eea3a7db",
+    "systemInstruction": "당신은 마케팅 전문가입니다.",
+    "model": "gemini-flash-lite-latest",
+    "geminiKey": "DEMO_KEY",
+    "createdAt": "2026-07-29T16:05:36.398Z"
+  },
+  {
+    "id": "api_3c61c6",
+    "name": "AI  AI",
+    "customApiKey": "sk-inst-3c61c623df3f7cec",
+    "systemInstruction": "당신은 사람들의 시선을 사로잡는 감각적인 수석 마케팅 카피라이터입니다.\n제품, 서비스, 또는 아이디어에 대한 정보를 바탕으로 반응률을 극대화할 수 있는 마케팅 문구를 작성하세요.\n\n포함 내용:\n- 💥 헤드라인 후보 5가지 (임팩트형, 호기심 유발형, 혜택 강조형 등)\n- 📲 SNS / 인스타그램용 짧은 카피 (해시태그 포함)\n- ✉️ 고객 클릭 유발 이메일 제목 3가지",
+    "model": "gemini-1.5-flash",
+    "geminiKey": "AIzaSyDummyKey12345",
+    "createdAt": "2026-07-29T15:43:12.329Z"
+  },
+  {
+    "id": "api_c0fd53",
+    "name": "Test AI",
+    "customApiKey": "sk-inst-c0fd534882e715c7",
+    "systemInstruction": "당신은 유능하고 친절한 AI 보조입니다. 사용자의 질문과 요구사항에 맞춰 최선의 답변을 명확하고 자연스러운 한국어로 작성하세요.",
+    "model": "gemini-1.5-flash",
+    "geminiKey": "TEST_KEY",
+    "createdAt": "2026-07-29T15:33:06.528Z"
+  },
+  {
+    "id": "api_1cd0c0",
+    "name": "Test AI",
+    "customApiKey": "sk-inst-1cd0c008be71587f",
+    "systemInstruction": "당신은 유능하고 친절한 AI 보조입니다. 사용자의 질문과 요구사항에 맞춰 최선의 답변을 명확하고 자연스러운 한국어로 작성하세요.",
+    "model": "gemini-1.5-flash",
+    "geminiKey": "TEST_KEY",
+    "createdAt": "2026-07-29T15:32:14.772Z"
+  },
+  {
+    "id": "api_65c928",
+    "name": "테스트 전문가 AI",
+    "customApiKey": "sk-inst-65c92865785db7ed",
+    "systemInstruction": "당신은 최고의 테스트 전문가입니다.",
+    "model": "gemini-flash-lite-latest",
+    "geminiKey": "TEST_GEMINI_KEY",
+    "createdAt": "2026-07-29T15:28:51.135Z"
+  }
+]

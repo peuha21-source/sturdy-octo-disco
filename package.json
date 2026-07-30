@@ -1,0 +1,17 @@
+{
+  "name": "instruction-studio",
+  "version": "1.0.0",
+  "description": "AI System Instruction & Custom API Generator Studio",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "gemini",
+    "ai",
+    "system-instruction",
+    "custom-api"
+  ],
+  "author": "",
+  "license": "ISC"
+}

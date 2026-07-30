@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instruction Studio — AI 시스템 인스트럭션 & 숨김 API 생성기</title>
+    <meta name="description" content="Gemini API 기반 시스템 인스트럭션 설정 및 숨겨진 API 응답 생성 스튜디오">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Navigation Header -->
+        <header class="navbar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Instruction Studio</h1>
+                    <span>AI System Instruction & Hidden API Generator</span>
+                </div>
+            </div>
+
+            <div class="top-actions">
+                <div id="api-status-pill" class="api-status-pill">
+                    <span class="api-status-dot"></span>
+                    <span id="api-status-text">API 키 미등록</span>
+                </div>
+
+                <button id="btn-open-api-modal" class="btn btn-secondary">
+                    <i class="fa-solid fa-key"></i> API 키 설정
+                </button>
+
+                <button id="btn-open-custom-modal" class="btn btn-primary"
+                    style="background:var(--accent-grad); box-shadow:0 0 20px rgba(168, 85, 247, 0.4);">
+                    <i class="fa-solid fa-rocket"></i> 나만의 Custom API 내보내기
+                </button>
+
+                <button id="btn-open-runner-modal" class="btn btn-secondary" style="border-color:rgba(0,242,254,0.3); color:var(--primary);">
+                    <i class="fa-solid fa-gamepad"></i> Custom API 테스트기
+                </button>
+
+                <button id="btn-open-payload-modal" class="btn btn-accent">
+                    <i class="fa-solid fa-code"></i> cURL / JSON 뷰어
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace Layout Grid -->
+        <main class="main-grid">
+            <!-- Left Sidebar: Instruction & Model Studio -->
+            <aside class="sidebar">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <span class="panel-title"><i class="fa-solid fa-sliders"></i> AI 시스템 설정</span>
+                    </div>
+
+                    <!-- AI Model Selector -->
+                    <div class="form-group">
+                        <label class="form-label" for="select-model">
+                            <span>AI 모델 (Gemini Model)</span>
+                        </label>
+                        <select id="select-model" class="form-select">
+                            <option value="gemini-flash-lite-latest" selected>Gemini Flash Lite Latest (최고속, 무료 티어 권장)
+                            </option>
+                            <option value="gemini-1.5-flash">Gemini 1.5 Flash (안정적)</option>
+                            <option value="gemini-2.0-flash">Gemini 2.0 Flash (초고속)</option>
+                            <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite</option>
+                            <option value="gemini-1.5-pro">Gemini 1.5 Pro (고성능 추론)</option>
+                        </select>
+                    </div>
+
+                    <!-- Instruction Presets -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>인스트럭션 프리셋 (Templates)</span>
+                            <span style="font-size:0.75rem; color:var(--primary)">선택 시 적용</span>
+                        </label>
+                        <div id="presets-container" class="presets-container">
+                            <!-- Dynamically populated via presets.js -->
+                        </div>
+                    </div>
+
+                    <!-- System Instruction Input -->
+                    <div class="form-group">
+                        <label class="form-label" for="system-instruction-input">
+                            <span>시스템 인스트럭션 (System Instruction)</span>
+                            <button id="btn-reset-instruction" class="btn-icon" title="초기화"
+                                style="padding:0.2rem 0.4rem; font-size:0.75rem">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </button>
+                        </label>
+                        <textarea id="system-instruction-input" class="form-textarea"
+                            placeholder="AI에게 부여할 역할, 행동 수칙, 출력 포맷 등을 지정하세요..."></textarea>
+                    </div>
+
+                    <!-- Hyperparameters -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>창의성 온도 (Temperature)</span>
+                        </label>
+                        <div class="slider-group">
+                            <input type="range" id="input-temp" min="0.0" max="2.0" step="0.1" value="0.7">
+                            <span id="val-temp" class="slider-val">0.7</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area: Prompt Input & Generated Output -->
+            <section class="workspace-container">
+                <!-- User Prompt Input Panel -->
+                <div class="panel-card input-section">
+                    <div class="panel-header">
+                        <span class="panel-title"><i class="fa-solid fa-feather"></i> 사용자 입력 (User Input Prompt)</span>
+                        <button id="btn-clear-input" class="btn-secondary"
+                            style="padding:0.3rem 0.7rem; font-size:0.8rem">
+                            <i class="fa-solid fa-trash-can"></i> 입력 지우기
+                        </button>
+                    </div>
+
+                    <div class="form-group">
+                        <textarea id="user-prompt-input" class="form-textarea" style="min-height: 120px;"
+                            placeholder="AI 시스템 인스트럭션에 전달할 내용이나 질문, 코드를 입력하세요... (Ctrl + Enter로 바로 실행)"></textarea>
+                    </div>
+
+                    <!-- File Dropzone Attachment -->
+                    <div id="dropzone" class="dropzone">
+                        <input type="file" id="file-input" style="display:none"
+                            accept="text/*,.json,.js,.py,.html,.css,.md">
+                        <i class="fa-solid fa-cloud-arrow-up"
+                            style="font-size:1.5rem; color:var(--primary); margin-bottom:0.3rem"></i>
+                        <div class="dropzone-text">텍스트 파일 / 코드 첨부 (클릭 또는 드래그 & 드롭)</div>
+                        <div id="attached-file-info"
+                            style="font-size:0.8rem; color:var(--primary); margin-top:0.3rem; font-weight:600"></div>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end;">
+                        <button id="btn-generate" class="btn btn-primary"
+                            style="padding:0.75rem 1.8rem; font-size:1rem">
+                            <i class="fa-solid fa-bolt"></i> AI 인스트럭션 실행하기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Generated Output Panel -->
+                <div class="panel-card output-section">
+                    <div class="panel-header">
+                        <span class="panel-title"><i class="fa-solid fa-robot"></i> 숨김 API 뱉기 결과 (Output)</span>
+                        <div style="display:flex; gap:0.5rem">
+                            <button id="btn-copy-output" class="btn btn-secondary"
+                                style="padding:0.35rem 0.75rem; font-size:0.8rem">
+                                <i class="fa-solid fa-copy"></i> 마크다운 복사
+                            </button>
+                            <button id="btn-toggle-raw" class="btn btn-secondary"
+                                style="padding:0.35rem 0.75rem; font-size:0.8rem">
+                                <i class="fa-solid fa-code"></i> RAW 토글
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Output Container -->
+                    <div id="output-box" class="output-box">
+                        <div id="output-placeholder" class="output-placeholder">
+                            <i class="fa-solid fa-terminal"></i>
+                            <div>상단의 사용자 입력 후 <b>[AI 인스트럭션 실행하기]</b> 버튼을 누르면<br>숨겨진 API 인스트럭션 결과가 이곳에 출력됩니다.</div>
+                        </div>
+                        <div id="output-content" class="markdown-body" style="display:none;"></div>
+                        <pre id="output-raw"
+                            style="display:none; font-family:'Fira Code', monospace; font-size:0.85rem; white-space:pre-wrap;"></pre>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- API Key Setup Modal -->
+    <div id="api-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="display:flex; align-items:center; gap:0.5rem">
+                    <i class="fa-solid fa-key" style="color:var(--primary)"></i> Gemini API 키 설정
+                </h3>
+                <button id="btn-close-api-modal" class="btn-icon">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.88rem; color:var(--text-muted)">
+                    Google AI Studio에서 발급받은 Gemini API 키를 입력하세요. API 키는 브라우저 LocalStorage에 마스킹 처리되어 안전하게 보관되며 외부 서버로
+                    전송되지 않습니다.
+                </p>
+                <div class="form-group">
+                    <label class="form-label" for="input-api-key">API Key (숨김 마스킹)</label>
+                    <div style="position:relative; display:flex; align-items:center">
+                        <input type="password" id="input-api-key" class="form-input" placeholder="AIzaSy..."
+                            style="padding-right: 40px;">
+                        <button id="btn-toggle-key-visibility" class="btn-icon"
+                            style="position:absolute; right:5px; border:none; background:transparent">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem">
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank"
+                        style="color:var(--primary); font-size:0.82rem; text-decoration:none">
+                        <i class="fa-solid fa-up-right-from-square"></i> API 키 발급받기 (무료)
+                    </a>
+                    <div style="display:flex; gap:0.5rem">
+                        <button id="btn-test-api-key" class="btn btn-secondary" style="font-size:0.85rem">
+                            <i class="fa-solid fa-plug-circle-check"></i> 연결 테스트
+                        </button>
+                        <button id="btn-remove-api-key" class="btn btn-secondary" style="font-size:0.85rem">삭제</button>
+                        <button id="btn-save-api-key" class="btn btn-primary" style="font-size:0.85rem">저장하기</button>
+                    </div>
+                </div>
+                <div id="api-test-result"
+                    style="margin-top:0.8rem; font-size:0.82rem; padding:0.6rem 0.8rem; border-radius:var(--radius-md); display:none;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden API Payload Modal (cURL / REST API JSON Exporter) -->
+    <div id="payload-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="display:flex; align-items:center; gap:0.5rem">
+                    <i class="fa-solid fa-code-branch" style="color:var(--accent)"></i> 숨김 API 뱉기 (Payload & cURL
+                    Exporter)
+                </h3>
+                <button id="btn-close-payload-modal" class="btn-icon">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="tab-buttons">
+                    <button id="tab-curl" class="tab-btn active">cURL 명령어</button>
+                    <button id="tab-json" class="tab-btn">JSON 페이로드</button>
+                    <button id="tab-fetch" class="tab-btn">JavaScript Fetch</button>
+                </div>
+
+                <div id="payload-display" class="payload-code"></div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.8rem; color:var(--text-muted)">
+                        <i class="fa-solid fa-shield-halved"></i> API 키는 <code>$GEMINI_API_KEY</code> 변수로 마스킹되었습니다.
+                    </span>
+                    <button id="btn-copy-payload" class="btn btn-primary" style="font-size:0.85rem">
+                        <i class="fa-solid fa-copy"></i> 페이로드 복사
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Custom AI API Export & Secret Key Generator Modal -->
+    <div id="custom-api-modal" class="modal-overlay">
+            <div class="modal-content" style="max-width: 850px;">
+                <div class="modal-header">
+                    <h3 style="display:flex; align-items:center; gap:0.5rem">
+                        <i class="fa-solid fa-rocket" style="color:var(--accent)"></i> 나만의 Custom AI API 생성 & 내보내기 스튜디오
+                    </h3>
+                    <button id="btn-close-custom-modal" class="btn-icon">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p style="font-size:0.88rem; color:var(--text-muted)">
+                        현재 설정한 <b>시스템 인스트럭션</b>과 <b>보안 API 키</b>가 내장된 독립형 Custom AI API 엔드포인트를 즉시 발급합니다.<br>
+                        외부 사용자나 타 웹사이트, 파이썬 코드에서 <b>인스트럭션이나 원본 Gemini API 키 노출 없이</b> 바로 호출할 수 있습니다!
+                    </p>
+
+                    <!-- Custom API Form -->
+                    <div
+                        style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); padding:1.2rem; border-radius:var(--radius-md); display:flex; flex-direction:column; gap:0.8rem;">
+                        <div class="form-group">
+                            <label class="form-label" for="custom-api-name">Custom API 이름</label>
+                            <input type="text" id="custom-api-name" class="form-input"
+                                placeholder="예: 나만의 심리 상담가 AI, 전문 마케팅 카피라이터...">
+                        </div>
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-top:0.4rem;">
+                            <span style="font-size:0.8rem; color:var(--primary)">
+                                <i class="fa-solid fa-check"></i> 좌측에 작성된 System Instruction이 자동 탑재됩니다.
+                            </span>
+                            <button id="btn-create-custom-api" class="btn btn-accent"
+                                style="font-size:0.88rem; padding:0.55rem 1.4rem;">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Custom API 엔드포인트 발급하기
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Generated Custom APIs List & Usage Cards -->
+                    <div style="margin-top:1rem; display:flex; flex-direction:column; gap:0.8rem;">
+                        <h4
+                            style="font-size:0.95rem; color:var(--text-main); display:flex; align-items:center; gap:0.5rem;">
+                            <i class="fa-solid fa-list-check" style="color:var(--primary)"></i> 발급된 Custom AI API 목록 &
+                            호출 코드 (cURL)
+                        </h4>
+                        <div id="custom-api-list"
+                            style="display:flex; flex-direction:column; gap:1rem; max-height:320px; overflow-y:auto;">
+                            <!-- Dynamically populated via app.js -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom AI API Tester / Runner Modal -->
+        <div id="custom-api-runner-modal" class="modal-overlay">
+            <div class="modal-content" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h3 style="display:flex; align-items:center; gap:0.5rem">
+                        <i class="fa-solid fa-gamepad" style="color:var(--primary)"></i> Custom AI API 즉시 테스트 실행기
+                    </h3>
+                    <button id="btn-close-runner-modal" class="btn-icon">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p style="font-size:0.88rem; color:var(--text-muted)">
+                        발급된 <b>sk-inst-... Secret API Key</b>를 이용하여 로컬 API 엔드포인트(<code>http://localhost:5000/api/v1/custom/run</code>)를 웹에서 직접 호출하고 결과를 확인합니다.
+                    </p>
+
+                    <div class="form-group">
+                        <label class="form-label" for="runner-api-key">Custom API Key</label>
+                        <input type="text" id="runner-api-key" class="form-input" placeholder="sk-inst-..." style="font-family:'Fira Code', monospace; color:var(--primary); font-weight:600;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="runner-prompt-input">테스트 프롬프트 / 질문</label>
+                        <textarea id="runner-prompt-input" class="form-textarea" style="min-height: 100px;" placeholder="AI에게 전달할 프롬프트나 질문을 작성하세요 (예: 안녕하세요! 이 글 좀 번역해 주세요)"></textarea>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end;">
+                        <button id="btn-run-custom-api-test" class="btn btn-primary" style="padding:0.65rem 1.6rem;">
+                            <i class="fa-solid fa-paper-plane"></i> ⚡ Custom API 호출 테스트
+                        </button>
+                    </div>
+
+                    <!-- Output Box -->
+                    <div style="margin-top:0.4rem; display:flex; flex-direction:column; gap:0.4rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label class="form-label">테스트 응답 결과 (Output)</label>
+                            <span id="runner-status-info" style="font-size:0.8rem; color:var(--primary); font-weight:600;"></span>
+                        </div>
+                        <div id="runner-output-box" class="payload-code" style="min-height:140px; max-height:280px; white-space:pre-wrap; overflow-y:auto; line-height:1.6;">
+                            <span style="color:var(--text-dim); font-size:0.85rem;">질문 작성 후 [Custom API 호출 테스트] 버튼을 누르면 인스트럭션이 적용된 결과가 표시됩니다.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification Container -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <!-- Scripts -->
+        <script src="presets.js"></script>
+        <script src="app.js"></script>
+</body>
+
+</html>
