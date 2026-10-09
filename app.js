@@ -1,6 +1,6 @@
 /**
  * SciMaster - 중학 과학 1~3 개념 & 과학고 면접 마스터
- * Main Application Logic (생물 검색표 가지치기 시뮬레이터 포함)
+ * Main Application Logic (모바일 반응형 Canvas 대응 포함)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -135,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (targetView === 'view-simulators' && gasCanvas) {
+          resizeGasCanvas();
           startGasSimulation();
         } else if (animFrameId) {
           cancelAnimationFrame(animFrameId);
@@ -159,6 +160,10 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('input', (e) => {
       searchQuery = e.target.value.trim().toLowerCase();
       renderConceptExplorer();
+    });
+
+    window.addEventListener('resize', () => {
+      if (gasCanvas) resizeGasCanvas();
     });
   }
 
@@ -545,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
     quizCounter.textContent = `${currentQuizIndex + 1} / ${quizDataList.length}`;
   }
 
-  // --- 4. Dichotomous Key Simulator (생물 '예/아니요' 가지치기 검색표) ---
+  // --- 4. Dichotomous Key Simulator ---
   const keyTreeData = {
     start: {
       step: '1단계 질문',
@@ -571,7 +576,6 @@ document.addEventListener('DOMContentLoaded', () => {
       yes: 'res_animalia',
       no: 'res_protista'
     },
-    // Results
     res_monera: {
       isResult: true,
       title: '🦠 원핵생물계 (Monera)',
@@ -646,9 +650,9 @@ document.addEventListener('DOMContentLoaded', () => {
       keyStepBadge.style.color = '#0f172a';
 
       keyQuestionText.innerHTML = `
-        <div style="font-size: 1.6rem; color: var(--accent-cyan); margin-bottom: 0.8rem;">${node.title}</div>
-        <p style="font-size: 1.05rem; font-weight: 500; line-height: 1.6; color: var(--text-main); margin-bottom: 0.8rem;">${node.desc}</p>
-        <div style="font-size: 0.95rem; font-weight: 700; color: var(--accent-purple); background: rgba(168,85,247,0.15); padding: 0.6rem 1rem; border-radius: 10px; display: inline-block;">${node.examples}</div>
+        <div style="font-size: 1.4rem; color: var(--accent-cyan); margin-bottom: 0.6rem;">${node.title}</div>
+        <p style="font-size: 0.95rem; font-weight: 500; line-height: 1.5; color: var(--text-main); margin-bottom: 0.6rem;">${node.desc}</p>
+        <div style="font-size: 0.88rem; font-weight: 700; color: var(--accent-purple); background: rgba(168,85,247,0.15); padding: 0.5rem 0.8rem; border-radius: 8px; display: inline-block;">${node.examples}</div>
       `;
 
       keyYesBtn.style.display = 'none';
@@ -726,6 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (gasCanvas) {
       gasCtx = gasCanvas.getContext('2d');
+      resizeGasCanvas();
       setupGasParticles();
 
       gasTempInput.addEventListener('input', () => {
@@ -742,16 +747,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function resizeGasCanvas() {
+    if (!gasCanvas || !gasCanvas.parentElement) return;
+    const parentWidth = gasCanvas.parentElement.clientWidth - 40;
+    if (parentWidth > 0) {
+      gasCanvas.width = Math.min(parentWidth, 400);
+    }
+  }
+
   function setupGasParticles() {
     particles = [];
-    const count = 40;
+    const count = 35;
     for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * (gasCanvas.width - 20) + 10,
         y: Math.random() * (gasCanvas.height - 20) + 10,
         vx: (Math.random() - 0.5) * 4,
         vy: (Math.random() - 0.5) * 4,
-        radius: 5
+        radius: 4
       });
     }
   }
