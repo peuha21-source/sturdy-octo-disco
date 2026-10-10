@@ -1,6 +1,6 @@
 /**
- * SciMaster - 중학 과학 1~3 개념 & 과학고 면접 마스터
- * Main Application Logic (모바일 반응형 Canvas 대응 포함)
+ * SciMaster - 대한민국 중학 과학 1~3학년 통합 개념 & 과학고 면접 마스터
+ * Main Application Logic
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,6 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('searchInput');
   const conceptContainer = document.getElementById('conceptContainer');
   const themeToggleBtn = document.getElementById('themeToggle');
+
+  // --- Hero Stat Elements ---
+  const statUnitCount = document.getElementById('statUnitCount');
+  const statConceptCount = document.getElementById('statConceptCount');
+  const statQuizCount = document.getElementById('statQuizCount');
 
   // --- Tracker Elements ---
   const overallProgressBar = document.getElementById('overallProgressBar');
@@ -79,25 +84,69 @@ document.addEventListener('DOMContentLoaded', () => {
   let animFrameId = null;
 
   // 4. Biological Key Tree Sim Elements
+  const keyModeSelect = document.getElementById('keyModeSelect');
   const keyStepBadge = document.getElementById('keyStepBadge');
   const keyQuestionText = document.getElementById('keyQuestionText');
   const keyYesBtn = document.getElementById('keyYesBtn');
   const keyNoBtn = document.getElementById('keyNoBtn');
   const keyPathText = document.getElementById('keyPathText');
   const keyResetBtn = document.getElementById('keyResetBtn');
+  let currentKeyMode = 'kingdom';
   let currentKeyNode = 'start';
   let keyHistoryPath = ['시작'];
 
   // --- Initializers ---
   initTheme();
+  initStats();
   initNavigation();
-  renderCategoryFilter();
   renderConceptExplorer();
   renderTrackerView();
   renderMisconceptions();
   initQuizModule();
   initSimulators();
   initKeyTreeSimulator();
+  renderMath();
+
+  // --- Stats in Hero ---
+  function initStats() {
+    let totalUnits = 0;
+    let totalConcepts = 0;
+    let totalQuizzes = 0;
+
+    scienceData.forEach(g => {
+      totalUnits += g.units.length;
+      g.units.forEach(u => {
+        totalConcepts += u.concepts.length;
+        if (u.interviewQuestions) totalQuizzes += u.interviewQuestions.length;
+      });
+    });
+
+    if (statUnitCount) statUnitCount.textContent = `${totalUnits}개`;
+    if (statConceptCount) statConceptCount.textContent = `${totalConcepts}개`;
+    if (statQuizCount) statQuizCount.textContent = `${totalQuizzes}문항`;
+  }
+
+  // --- KaTeX Math Rendering Utility ---
+  function renderMath(targetElement) {
+    if (window.renderMathInElement) {
+      try {
+        renderMathInElement(targetElement || document.body, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false }
+          ],
+          throwOnError: false
+        });
+      } catch (err) {
+        console.warn('KaTeX render warning:', err);
+      }
+    }
+  }
+
+  // Make sure KaTeX renders after scripts finish loading
+  window.addEventListener('load', () => {
+    renderMath();
+  });
 
   // --- Theme Toggle ---
   function initTheme() {
@@ -111,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.documentElement.setAttribute('data-theme', newTheme);
       localStorage.setItem('sciMaster_theme', newTheme);
       updateThemeIcon(newTheme);
+      if (gasCanvas) resizeGasCanvas();
     });
   }
 
@@ -120,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
       : '<i class="fas fa-moon"></i> <span>다크 모드</span>';
   }
 
-  // --- Navigation & Tabs ---
+  // --- Navigation & View Tabs ---
   function initNavigation() {
     navTabs.forEach(tab => {
       tab.addEventListener('click', () => {
@@ -140,6 +190,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (animFrameId) {
           cancelAnimationFrame(animFrameId);
         }
+
+        // Trigger math rendering on view switch
+        setTimeout(() => renderMath(activeSec), 50);
       });
     });
 
@@ -167,23 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function renderCategoryFilter() {
-    const categories = new Set();
-    scienceData.forEach(g => {
-      g.units.forEach(u => {
-        if (u.category) categories.add(u.category);
-      });
-    });
-
-    categories.forEach(cat => {
-      const opt = document.createElement('option');
-      opt.value = cat;
-      opt.textContent = cat;
-      categoryFilterSelect.appendChild(opt);
-    });
-  }
-
-  // --- Concept Explorer Render ---
+  // --- Concept Explorer View Render ---
   function renderConceptExplorer() {
     conceptContainer.innerHTML = '';
     let matchedUnitsCount = 0;
@@ -194,14 +231,23 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const filteredUnits = gradeData.units.filter(unit => {
-        if (activeCategory !== 'all' && unit.category !== activeCategory) {
-          return false;
+        if (activeCategory !== 'all') {
+          const matchCat = unit.category === activeCategory;
+          const matchSub = unit.subCategory && unit.subCategory.includes(activeCategory);
+          if (!matchCat && !matchSub) return false;
         }
+
         if (searchQuery) {
           const inTitle = unit.title.toLowerCase().includes(searchQuery);
           const inSummary = unit.summary.toLowerCase().includes(searchQuery);
-          const inConcepts = unit.concepts.some(c => c.name.toLowerCase().includes(searchQuery) || c.desc.toLowerCase().includes(searchQuery));
-          return inTitle || inSummary || inConcepts;
+          const inCategory = (unit.category || '').toLowerCase().includes(searchQuery);
+          const inSubCategory = (unit.subCategory || '').toLowerCase().includes(searchQuery);
+          const inConcepts = unit.concepts.some(c => 
+            c.name.toLowerCase().includes(searchQuery) || 
+            c.desc.toLowerCase().includes(searchQuery)
+          );
+          const inStandards = unit.standards.some(s => s.toLowerCase().includes(searchQuery));
+          return inTitle || inSummary || inCategory || inSubCategory || inConcepts || inStandards;
         }
         return true;
       });
@@ -236,15 +282,20 @@ document.addEventListener('DOMContentLoaded', () => {
       conceptContainer.innerHTML = `
         <div class="empty-state">
           <i class="fas fa-search"></i>
-          <p>검색 조건에 해당되는 과학 개념 단원이 없습니다.</p>
+          <p style="font-weight: 700; font-size: 1.05rem;">검색 조건에 일치하는 과학 단원이 없습니다.</p>
+          <span style="font-size: 0.85rem;">검색어를 확인하거나 전체 학년/분야 필터를 선택해 보세요.</span>
         </div>
       `;
     }
+
+    renderMath(conceptContainer);
   }
 
   function createUnitCard(unit) {
     const card = document.createElement('div');
     card.className = 'unit-card glass-panel';
+
+    const catClass = `cat-${unit.category || '기타'}`;
 
     let conceptsHtml = unit.concepts.map(c => `
       <div class="concept-item">
@@ -278,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ${unit.formulas.map(f => `
             <div class="formula-item">
               <span class="formula-title">${f.name}:</span>
-              <code class="formula-code">${f.eq}</code>
+              <code class="formula-code">$${f.eq}$</code>
               <span class="formula-desc">(${f.desc})</span>
             </div>
           `).join('')}
@@ -298,34 +349,45 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }).join('');
 
-    let misconceptionsHtml = unit.misconceptions.map(m => `
-      <div class="misconception-card-sm">
-        <div class="misc-q"><i class="fas fa-exclamation-triangle"></i> ${m.title}</div>
-        <div class="misc-a">${m.detail}</div>
-      </div>
-    `).join('');
+    let misconceptionsHtml = '';
+    if (unit.misconceptions && unit.misconceptions.length > 0) {
+      misconceptionsHtml = `
+        <div class="card-section">
+          <h4 class="sec-title"><i class="fas fa-lightbulb"></i> 자주 혼동하는 오개념 바로잡기</h4>
+          ${unit.misconceptions.map(m => `
+            <div class="misconception-card-sm">
+              <div class="misc-q"><i class="fas fa-exclamation-triangle"></i> ${m.title}</div>
+              <div class="misc-a">${m.detail}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
 
-    let interviewHtml = unit.interviewQuestions.map(iq => `
-      <div class="interview-q-card">
-        <div class="iq-badge"><i class="fas fa-user-graduate"></i> 과학고 면접 예상 Q</div>
-        <div class="iq-question">" ${iq.q} "</div>
-        <details class="iq-answer-details">
-          <summary>모범 답안 및 평가 요소 확인</summary>
-          <div class="iq-answer">${iq.a}</div>
-        </details>
-      </div>
-    `).join('');
+    let interviewHtml = '';
+    if (unit.interviewQuestions && unit.interviewQuestions.length > 0) {
+      interviewHtml = unit.interviewQuestions.map(iq => `
+        <div class="interview-q-card">
+          <div class="iq-badge"><i class="fas fa-user-graduate"></i> 과학고 심층 면접 예상 Q</div>
+          <div class="iq-question">" ${iq.q} "</div>
+          <details class="iq-answer-details">
+            <summary><i class="fas fa-chevron-down"></i> 모범 답안 및 핵심 평가 요소</summary>
+            <div class="iq-answer">${iq.a}</div>
+          </details>
+        </div>
+      `).join('');
+    }
 
     card.innerHTML = `
       <div class="card-top-bar">
-        <span class="unit-cat-tag">${unit.category || '과학'}</span>
-        <span class="unit-id-tag">${unit.id}</span>
+        <span class="unit-cat-tag ${catClass}">${unit.category || '과학'} · ${unit.subCategory || ''}</span>
+        <span class="unit-id-tag">단원 ${unit.id}</span>
       </div>
       <h3 class="unit-title">${unit.title}</h3>
       <p class="unit-summary">${unit.summary}</p>
       
       <div class="card-section">
-        <h4 class="sec-title"><i class="fas fa-book-open"></i> 핵심 개념 정의 & 원리</h4>
+        <h4 class="sec-title"><i class="fas fa-book-open"></i> 핵심 과학 개념 정의</h4>
         ${conceptsHtml}
       </div>
 
@@ -333,15 +395,11 @@ document.addEventListener('DOMContentLoaded', () => {
       ${formulasHtml}
 
       <div class="card-section">
-        <h4 class="sec-title"><i class="fas fa-tasks"></i> 성취기준 체크</h4>
+        <h4 class="sec-title"><i class="fas fa-tasks"></i> 핵심 성취기준 점검</h4>
         <div class="standards-list">${standardsHtml}</div>
       </div>
 
-      <div class="card-section">
-        <h4 class="sec-title"><i class="fas fa-lightbulb"></i> 자주 혼동하는 개념 (오개념 타파)</h4>
-        ${misconceptionsHtml}
-      </div>
-
+      ${misconceptionsHtml}
       ${interviewHtml}
     `;
 
@@ -357,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return card;
   }
 
-  // --- Tracker View ---
+  // --- Section 2: Standards Tracker View ---
   function renderTrackerView() {
     let totalStandards = 0;
     let checkedTotal = 0;
@@ -423,12 +481,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const elem = gNum === 1 ? grade1Progress : gNum === 2 ? grade2Progress : grade3Progress;
       if (elem) {
         elem.style.width = `${gPct}%`;
-        elem.previousElementSibling.querySelector('.g-pct').textContent = `${gPct}%`;
+        const pctSpan = elem.closest('.g-stat-card').querySelector('.g-pct');
+        if (pctSpan) pctSpan.textContent = `${gPct}%`;
       }
     });
   }
 
-  // --- Misconceptions Section ---
+  // --- Section 4: Misconceptions View ---
   function renderMisconceptions() {
     misconceptionContainer.innerHTML = '';
 
@@ -440,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.className = 'misconception-card glass-panel';
             card.innerHTML = `
               <div class="misc-tag-bar">
-                <span class="misc-grade-tag">${g.gradeTitle}</span>
+                <span class="misc-grade-tag">${g.gradeTitle.split(' ')[1]}</span>
                 <span class="misc-unit-tag">${u.title}</span>
               </div>
               <h3 class="misc-question"><i class="fas fa-question-circle"></i> ${m.title}</h3>
@@ -454,9 +513,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     });
+
+    renderMath(misconceptionContainer);
   }
 
-  // --- Quiz & Flashcard Module ---
+  // --- Section 3: Flashcard Quiz Module ---
   function initQuizModule() {
     buildQuizList('all');
 
@@ -491,6 +552,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     nextQuizBtn.addEventListener('click', () => {
       if (currentQuizIndex < quizDataList.length - 1) {
+        currentQuizIndex++;
+        isCardFlipped = false;
+        renderCurrentQuiz();
+      }
+    });
+
+    // Keyboard navigation for flashcards
+    window.addEventListener('keydown', (e) => {
+      const quizSection = document.getElementById('view-quiz');
+      if (!quizSection.classList.contains('active')) return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        isCardFlipped = !isCardFlipped;
+        flashcard.classList.toggle('flipped', isCardFlipped);
+      } else if (e.code === 'ArrowLeft' && currentQuizIndex > 0) {
+        currentQuizIndex--;
+        isCardFlipped = false;
+        renderCurrentQuiz();
+      } else if (e.code === 'ArrowRight' && currentQuizIndex < quizDataList.length - 1) {
         currentQuizIndex++;
         isCardFlipped = false;
         renderCurrentQuiz();
@@ -539,82 +620,157 @@ document.addEventListener('DOMContentLoaded', () => {
     cardFrontQ.innerHTML = `
       <div class="card-unit-badge">${qItem.gradeTitle} | ${qItem.unitTitle}</div>
       <p class="q-text">"${qItem.question}"</p>
-      <div class="flip-hint"><i class="fas fa-sync-alt"></i> 카드를 클릭하면 모범 답안을 확인할 수 있습니다</div>
+      <div class="flip-hint"><i class="fas fa-sync-alt"></i> 카드를 클릭하거나 스페이스바를 누르면 모범 답안을 확인할 수 있습니다</div>
     `;
 
     cardBackA.innerHTML = `
-      <div class="card-unit-badge answer-badge">과학고 면접 모범 답안 & 개념 요약</div>
+      <div class="card-unit-badge answer-badge"><i class="fas fa-check-circle"></i> 과학고 심층 면접 모범 답안 & 핵심 포인트</div>
       <p class="a-text">${qItem.answer}</p>
     `;
 
     quizCounter.textContent = `${currentQuizIndex + 1} / ${quizDataList.length}`;
+    renderMath(flashcard);
   }
 
-  // --- 4. Dichotomous Key Simulator ---
-  const keyTreeData = {
-    start: {
-      step: '1단계 질문',
-      q: '핵막이 존재하여 원자핵을 갖춘 진핵세포 생물입니까?',
-      yes: 'step2',
-      no: 'res_monera'
+  // --- Section 5: Dichotomous Key Branching Tree Simulator ---
+  const keyTreeModes = {
+    kingdom: {
+      title: "생물 5계 '예/아니요' 가지치기 검색표",
+      nodes: {
+        start: {
+          step: '1단계 질문',
+          q: '핵막이 존재하여 원자핵을 갖춘 진핵세포 생물입니까?',
+          yes: 'step2',
+          no: 'res_monera'
+        },
+        step2: {
+          step: '2단계 질문',
+          q: '엽록체에서 광합성을 하여 스스로 유기물을 합성하는 다세포 생물입니까?',
+          yes: 'res_plantae',
+          no: 'step3'
+        },
+        step3: {
+          step: '3단계 질문',
+          q: '키틴 세포벽이 있으며, 외부 유기물을 분해하여 흡수 영양을 수행합니까?',
+          yes: 'res_fungi',
+          no: 'step4'
+        },
+        step4: {
+          step: '4단계 질문',
+          q: '세포벽이 없고 다른 생물을 섭식하여 영양분을 얻는 다세포 생물입니까?',
+          yes: 'res_animalia',
+          no: 'res_protista'
+        },
+        res_monera: {
+          isResult: true,
+          title: '🦠 원핵생물계 (Monera)',
+          desc: '세포에 핵막과 막성 세포 소기관이 없는 원시적 세포 구조. 펩티도글리칸 세포벽을 가지며 주로 단세포로 존재함.',
+          examples: '대표 생물: 대장균, 젖산균, 헬리코박터균, 남세균 (노스톡)'
+        },
+        res_plantae: {
+          isResult: true,
+          title: '🌿 식물계 (Plantae)',
+          desc: '진핵 다세포 생물로, 셀룰로스 세포벽을 가지며 엽록체에서 광합성을 하여 독립 영양을 하는 생산자.',
+          examples: '대표 생물: 솔이끼, 고사리, 소나무, 장미, 벼'
+        },
+        res_fungi: {
+          isResult: true,
+          title: '🍄 균계 (Fungi)',
+          desc: '진핵생물로 키틴 성분의 세포벽을 가지며, 엽록소가 없어 광합성을 못하고 유기물을 분해 흡수하는 종속 영양(분해자) 생물.',
+          examples: '대표 생물: 표고버섯, 푸른곰팡이, 누룩곰팡이, 효모(단세포)'
+        },
+        res_animalia: {
+          isResult: true,
+          title: '🦁 동물계 (Animalia)',
+          desc: '진핵 다세포 생물로 세포벽이 없으며, 다른 생물을 섭식하여 종속 영양을 하는 소비자. 운동 기관과 감각 신경계 발달.',
+          examples: '대표 생물: 지렁이, 오징어, 개구리, 독수리, 사람'
+        },
+        res_protista: {
+          isResult: true,
+          title: '🧫 원생생물계 (Protista)',
+          desc: '진핵생물 중 식물계, 동물계, 균계에 속하지 않는 다양한 생물 집단. 단세포 생물부터 조직 분화가 없는 다세포 해조류까지 포함.',
+          examples: '대표 생물: 아메바, 짚신벌레, 유글레나, 미역, 김, 다시마'
+        }
+      }
     },
-    step2: {
-      step: '2단계 질문',
-      q: '엽록체에서 광합성을 하여 스스로 유기물을 합성하는 다세포 생물입니까?',
-      yes: 'res_plantae',
-      no: 'step3'
-    },
-    step3: {
-      step: '3단계 질문',
-      q: '세포벽이 존재하며, 외부의 유기물을 분해하여 흡수 영양을 수행합니까?',
-      yes: 'res_fungi',
-      no: 'step4'
-    },
-    step4: {
-      step: '4단계 질문',
-      q: '세포벽이 없고 다른 생물을 섭식하여 영양분을 얻는 다세포 생물입니까?',
-      yes: 'res_animalia',
-      no: 'res_protista'
-    },
-    res_monera: {
-      isResult: true,
-      title: '🦠 원핵생물계 (Monera)',
-      desc: '세포에 핵막과 세포 소기관이 없는 가장 원시적인 세포 구조입니다. 펩티도글리칸 세포벽을 가지며 주로 단세포로 존재합니다.',
-      examples: '대표 생물: 대장균, 젖산균, 결핵균, 남세균 (노스톡)'
-    },
-    res_plantae: {
-      isResult: true,
-      title: '🌿 식물계 (Plantae)',
-      desc: '진핵 다세포 생물로, 셀룰로스 성분의 세포벽을 가지며 엽록체에서 빛에너지를 이용해 광합성을 하여 독립 영양 작용을 합니다.',
-      examples: '대표 생물: 솔이끼, 고사리, 소나무, 장미, 벼'
-    },
-    res_fungi: {
-      isResult: true,
-      title: '🍄 균계 (Fungi)',
-      desc: '진핵 다세포 생물(효모는 단세포)로 키틴 성분의 세포벽을 가지며, 엽록소가 없어 광합성을 못하고 유기물을 분해 흡수하여 종속 영양을 합니다.',
-      examples: '대표 생물: 버섯, 푸른곰팡이, 누룩곰팡이, 효모'
-    },
-    res_animalia: {
-      isResult: true,
-      title: '🦁 동물계 (Animalia)',
-      desc: '진핵 다세포 생물로 세포벽이 없으며, 다른 생물을 섭식하여 종속 영양을 합니다. 신경계와 근육계가 발달하여 이동성이 좋습니다.',
-      examples: '대표 생물: 지렁이, 오징어, 개구리, 독수리, 사람'
-    },
-    res_protista: {
-      isResult: true,
-      title: '🧫 원생생물계 (Protista)',
-      desc: '진핵생물 중 식물계, 동물계, 균계에 속하지 않는 다양한 생물 집단입니다. 단세포 생물부터 관다발이 없는 다세포 해조류까지 포함합니다.',
-      examples: '대표 생물: 아메바, 짚신벌레, 유글레나, 미역, 김, 다시마'
+    vertebrate: {
+      title: "척추동물 5대 강 '예/아니요' 가지치기 검색표",
+      nodes: {
+        start: {
+          step: '1단계 질문',
+          q: '체온을 주변 환경과 무관하게 일정하게 유지하는 정온(항온) 동물입니까?',
+          yes: 'v_step2',
+          no: 'v_step3'
+        },
+        v_step2: {
+          step: '2단계 질문',
+          q: '몸이 깃털로 덮여 있고 단단한 부리가 있으며 알(난생)을 낳습니까?',
+          yes: 'res_aves',
+          no: 'res_mammalia'
+        },
+        v_step3: {
+          step: '3단계 질문',
+          q: '평생 지느러미와 아가미를 이용하여 물속에서만 호흡하고 생활합니까?',
+          yes: 'res_pisces',
+          no: 'v_step4'
+        },
+        v_step4: {
+          step: '4단계 질문',
+          q: '어릴 때는 물속에서 아가미로, 성체는 육상에서 허파와 축축한 피부로 호흡합니까?',
+          yes: 'res_amphibia',
+          no: 'res_reptilia'
+        },
+        res_aves: {
+          isResult: true,
+          title: '🦅 조류 (Aves)',
+          desc: '정온 동물, 몸이 깃털로 덮여 있고 앞다리가 날개로 변형됨. 기낭이 있어 비행 시 효율적 호흡. 단단한 껍데기(난각) 알.',
+          examples: '대표 생물: 참새, 독수리, 펭귄, 타조'
+        },
+        res_mammalia: {
+          isResult: true,
+          title: '🐕 포유류 (Mammalia)',
+          desc: '정온 동물, 몸이 털로 덮여 있으며 젖을 먹여 새끼를 양육함. 태생(새끼를 낳음, 오리너구리 제외). 귓바퀴 발달.',
+          examples: '대표 생물: 사람, 호랑이, 고래, 박쥐'
+        },
+        res_pisces: {
+          isResult: true,
+          title: '🐟 어류 (Pisces)',
+          desc: '변온 동물, 몸이 비늘로 덮여 있고 지느러미로 헤엄치며 평생 아가미 호흡. 물속 산란(연질 알).',
+          examples: '대표 생물: 붕어, 상어, 고등어, 미꾸라지'
+        },
+        res_amphibia: {
+          isResult: true,
+          title: '🐸 양서류 (Amphibia)',
+          desc: '변온 동물, 변태를 거침. 유생(올챙이)은 꼬리와 아가미로 수중 호흡, 성체는 다리가 나오고 허파와 축축한 피부로 호흡.',
+          examples: '대표 생물: 참개구리, 도롱뇽, 맹꽁이, 무당개구리'
+        },
+        res_reptilia: {
+          isResult: true,
+          title: '🦎 파충류 (Reptilia)',
+          desc: '변온 동물, 몸 표면이 수분 증발을 막는 케라틴 각질 비늘이나 골판으로 덮임. 평생 허파 호흡, 육상에 단단한 가죽질 알 산란.',
+          examples: '대표 생물: 뱀, 거북, 카멜레온, 악어'
+        }
+      }
     }
   };
 
   function initKeyTreeSimulator() {
     if (!keyQuestionText) return;
 
+    if (keyModeSelect) {
+      keyModeSelect.addEventListener('change', (e) => {
+        currentKeyMode = e.target.value;
+        currentKeyNode = 'start';
+        keyHistoryPath = ['시작'];
+        renderKeyNode();
+      });
+    }
+
     renderKeyNode();
 
     keyYesBtn.addEventListener('click', () => {
-      const node = keyTreeData[currentKeyNode];
+      const modeData = keyTreeModes[currentKeyMode].nodes;
+      const node = modeData[currentKeyNode];
       if (node && !node.isResult) {
         keyHistoryPath.push('예');
         currentKeyNode = node.yes;
@@ -623,7 +779,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     keyNoBtn.addEventListener('click', () => {
-      const node = keyTreeData[currentKeyNode];
+      const modeData = keyTreeModes[currentKeyMode].nodes;
+      const node = modeData[currentKeyNode];
       if (node && !node.isResult) {
         keyHistoryPath.push('아니요');
         currentKeyNode = node.no;
@@ -639,28 +796,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderKeyNode() {
-    const node = keyTreeData[currentKeyNode];
+    const modeData = keyTreeModes[currentKeyMode].nodes;
+    const node = modeData[currentKeyNode];
     if (!node) return;
 
     keyPathText.textContent = `선택 경로: ${keyHistoryPath.join(' ➔ ')}`;
 
     if (node.isResult) {
-      keyStepBadge.textContent = '🎉 최종 분류 결과';
-      keyStepBadge.style.background = 'var(--accent-cyan)';
-      keyStepBadge.style.color = '#0f172a';
+      keyStepBadge.textContent = '🎉 최종 분류 도출';
+      keyStepBadge.style.background = 'var(--accent-emerald)';
+      keyStepBadge.style.color = '#ffffff';
 
       keyQuestionText.innerHTML = `
-        <div style="font-size: 1.4rem; color: var(--accent-cyan); margin-bottom: 0.6rem;">${node.title}</div>
-        <p style="font-size: 0.95rem; font-weight: 500; line-height: 1.5; color: var(--text-main); margin-bottom: 0.6rem;">${node.desc}</p>
-        <div style="font-size: 0.88rem; font-weight: 700; color: var(--accent-purple); background: rgba(168,85,247,0.15); padding: 0.5rem 0.8rem; border-radius: 8px; display: inline-block;">${node.examples}</div>
+        <div style="font-size: 1.45rem; color: var(--accent-primary); margin-bottom: 0.6rem; font-weight: 800;">${node.title}</div>
+        <p style="font-size: 0.95rem; font-weight: 500; line-height: 1.6; color: var(--text-secondary); margin-bottom: 0.8rem;">${node.desc}</p>
+        <div style="font-size: 0.9rem; font-weight: 700; color: var(--accent-primary); background: var(--cat-physics-bg); padding: 0.55rem 0.95rem; border-radius: 10px; display: inline-block;">${node.examples}</div>
       `;
 
       keyYesBtn.style.display = 'none';
       keyNoBtn.style.display = 'none';
     } else {
       keyStepBadge.textContent = node.step;
-      keyStepBadge.style.background = 'var(--accent-purple)';
-      keyStepBadge.style.color = '#fff';
+      keyStepBadge.style.background = 'var(--accent-primary)';
+      keyStepBadge.style.color = '#ffffff';
 
       keyQuestionText.textContent = `"${node.q}"`;
 
@@ -669,79 +827,88 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- Interactive Simulators ---
+  // --- Section 5: Interactive Physics/Chemistry Simulators ---
   function initSimulators() {
+    // 1. Energy Conservation Simulator
     function updateEnergySim() {
       const m = parseFloat(simMassInput.value);
       const h = parseFloat(simHeightInput.value);
       const v = parseFloat(simVelInput.value);
 
-      massValSpan.textContent = m;
-      heightValSpan.textContent = h;
-      velValSpan.textContent = v;
+      if (massValSpan) massValSpan.textContent = m;
+      if (heightValSpan) heightValSpan.textContent = h;
+      if (velValSpan) velValSpan.textContent = v;
 
       const g = 9.8;
       const ep = Math.round(m * g * h * 10) / 10;
       const ek = Math.round(0.5 * m * v * v * 10) / 10;
       const totalE = Math.round((ep + ek) * 10) / 10;
 
-      epValSpan.textContent = ep;
-      ekValSpan.textContent = ek;
-      totalEValSpan.textContent = totalE;
+      if (epValSpan) epValSpan.textContent = ep;
+      if (ekValSpan) ekValSpan.textContent = ek;
+      if (totalEValSpan) totalEValSpan.textContent = totalE;
 
-      const maxE = Math.max(totalE, 500);
+      const maxE = Math.max(totalE, 400);
       const epPct = Math.min((ep / maxE) * 100, 100);
       const ekPct = Math.min((ek / maxE) * 100, 100);
 
-      epBar.style.width = `${epPct}%`;
-      ekBar.style.width = `${ekPct}%`;
+      if (epBar) epBar.style.width = `${epPct}%`;
+      if (ekBar) ekBar.style.width = `${ekPct}%`;
     }
 
-    simMassInput.addEventListener('input', updateEnergySim);
-    simHeightInput.addEventListener('input', updateEnergySim);
-    simVelInput.addEventListener('input', updateEnergySim);
+    if (simMassInput) simMassInput.addEventListener('input', updateEnergySim);
+    if (simHeightInput) simHeightInput.addEventListener('input', updateEnergySim);
+    if (simVelInput) simVelInput.addEventListener('input', updateEnergySim);
     updateEnergySim();
 
+    // 2. Humidity & Saturation Calculator
     function updateHumiditySim() {
       const t = parseFloat(simTempInput.value);
       const w = parseFloat(simVaporInput.value);
 
-      tempValSpan.textContent = t;
-      vaporValSpan.textContent = w;
+      if (tempValSpan) tempValSpan.textContent = t;
+      if (vaporValSpan) vaporValSpan.textContent = w;
 
+      // Tetens empirical equation for saturation vapor pressure / capacity
       const satVapor = Math.round(4.8 * Math.exp(0.062 * t) * 10) / 10;
-      calcSatVaporSpan.textContent = satVapor;
+      if (calcSatVaporSpan) calcSatVaporSpan.textContent = satVapor;
 
       const relHumidity = Math.min(Math.round((w / satVapor) * 100), 100);
-      calcRelHumiditySpan.textContent = relHumidity;
+      if (calcRelHumiditySpan) calcRelHumiditySpan.textContent = relHumidity;
 
       if (w >= satVapor) {
         humidityStatusSpan.textContent = '포화 상태 (이슬점에 도달하여 물방울 응결 발생!)';
         humidityStatusSpan.className = 'status-tag saturated';
       } else {
-        humidityStatusSpan.textContent = `불포화 상태 (이슬점: 약 ${(t - (100 - relHumidity)/5).toFixed(1)} ℃)`;
+        const estDewPoint = Math.max((t - (100 - relHumidity) / 5), 0).toFixed(1);
+        humidityStatusSpan.textContent = `불포화 상태 (이슬점: 약 ${estDewPoint} ℃)`;
         humidityStatusSpan.className = 'status-tag unsaturated';
       }
     }
 
-    simTempInput.addEventListener('input', updateHumiditySim);
-    simVaporInput.addEventListener('input', updateHumiditySim);
+    if (simTempInput) simTempInput.addEventListener('input', updateHumiditySim);
+    if (simVaporInput) simVaporInput.addEventListener('input', updateHumiditySim);
     updateHumiditySim();
 
+    // 3. Boyle & Charles Law Gas Particle Canvas
     if (gasCanvas) {
       gasCtx = gasCanvas.getContext('2d');
       resizeGasCanvas();
       setupGasParticles();
 
-      gasTempInput.addEventListener('input', () => {
-        gasTempDisplay.textContent = gasTempInput.value;
-        updateGasSim();
-      });
+      if (gasTempInput) {
+        gasTempInput.addEventListener('input', () => {
+          if (gasTempDisplay) gasTempDisplay.textContent = gasTempInput.value;
+          updateGasSim();
+        });
+      }
 
-      gasPressureInput.addEventListener('input', () => {
-        gasPressureDisplay.textContent = gasPressureInput.value;
-        updateGasSim();
-      });
+      if (gasPressureInput) {
+        gasPressureInput.addEventListener('input', () => {
+          if (gasPressureDisplay) gasPressureDisplay.textContent = gasPressureInput.value;
+          updateGasSim();
+        });
+      }
 
       updateGasSim();
     }
@@ -749,19 +916,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resizeGasCanvas() {
     if (!gasCanvas || !gasCanvas.parentElement) return;
-    const parentWidth = gasCanvas.parentElement.clientWidth - 40;
+    const parentWidth = gasCanvas.parentElement.clientWidth;
     if (parentWidth > 0) {
-      gasCanvas.width = Math.min(parentWidth, 400);
+      gasCanvas.width = Math.min(parentWidth, 480);
     }
   }
 
   function setupGasParticles() {
     particles = [];
-    const count = 35;
+    const count = 38;
     for (let i = 0; i < count; i++) {
       particles.push({
-        x: Math.random() * (gasCanvas.width - 20) + 10,
-        y: Math.random() * (gasCanvas.height - 20) + 10,
+        x: Math.random() * (gasCanvas.width - 30) + 15,
+        y: Math.random() * (gasCanvas.height - 30) + 15,
         vx: (Math.random() - 0.5) * 4,
         vy: (Math.random() - 0.5) * 4,
         radius: 4
@@ -773,14 +940,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const tempK = parseFloat(gasTempInput.value);
     const p = parseFloat(gasPressureInput.value);
 
+    // V proportional to T / P
     const volPct = Math.min(Math.max(Math.round((tempK / p / 300) * 100), 20), 100);
-    gasVolDisplay.textContent = `${volPct}%`;
+    if (gasVolDisplay) gasVolDisplay.textContent = `${volPct}%`;
 
     const speedMult = Math.sqrt(tempK / 300);
 
     particles.forEach(pt => {
       const angle = Math.atan2(pt.vy, pt.vx);
-      const currentSpeed = 3 * speedMult;
+      const currentSpeed = 3.2 * speedMult;
       pt.vx = Math.cos(angle) * currentSpeed;
       pt.vy = Math.sin(angle) * currentSpeed;
     });
@@ -796,22 +964,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const p = parseFloat(gasPressureInput.value);
       const tempK = parseFloat(gasTempInput.value);
-      const volPct = Math.min(Math.max((tempK / p / 300), 0.25), 1.0);
+      const volPct = Math.min(Math.max((tempK / p / 300), 0.22), 1.0);
       const boxWidth = width * volPct;
 
       gasCtx.clearRect(0, 0, width, height);
 
-      gasCtx.strokeStyle = 'var(--accent-glow)';
-      gasCtx.lineWidth = 4;
+      // Container bounding box
+      gasCtx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
+      gasCtx.lineWidth = 3;
       gasCtx.strokeRect(0, 0, boxWidth, height);
 
-      gasCtx.fillStyle = '#ff4757';
-      gasCtx.fillRect(boxWidth, 0, 10, height);
+      // Moving Piston
+      gasCtx.fillStyle = '#6366f1';
+      gasCtx.fillRect(boxWidth - 4, 0, 8, height);
 
+      // Render moving particles
       particles.forEach(pt => {
         pt.x += pt.vx;
         pt.y += pt.vy;
 
+        // Bounce from walls
         if (pt.x - pt.radius <= 0) {
           pt.x = pt.radius;
           pt.vx *= -1;
@@ -830,9 +1002,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         gasCtx.beginPath();
         gasCtx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
-        gasCtx.fillStyle = '#00f2fe';
-        gasCtx.shadowBlur = 8;
-        gasCtx.shadowColor = '#00f2fe';
+        gasCtx.fillStyle = '#38bdf8';
+        gasCtx.shadowBlur = 6;
+        gasCtx.shadowColor = '#38bdf8';
         gasCtx.fill();
         gasCtx.shadowBlur = 0;
       });

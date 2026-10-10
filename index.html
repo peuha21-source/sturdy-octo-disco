@@ -4,10 +4,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SciMaster - 중학 과학 1~3학년 개념 총정리 & 과학고 면접 마스터</title>
-  <meta name="description" content="2015 개정 교육과정 성취기준 기반 중학교 과학 1~3학년 개념 완전정리, 과학고 면접 예상 질문 및 대화형 시뮬레이터 파스텔">
+  <title>SciMaster - 중학 과학 1~3학년 통합 개념 & 과학고 면접 마스터</title>
+  <meta name="description"
+    content="2015·2022 개정 교육과정 완벽 반영 중학교 과학 1~3학년 전범위 개념 사전, 과학고·영재교 심층 면접 대비, 성취기준 체크리스트 및 실시간 과학 시뮬레이터">
+
   <!-- FontAwesome & Google Fonts -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- KaTeX for Beautiful Mathematical Equations -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -18,29 +26,29 @@
     <div class="header-top-row">
       <div class="logo-container">
         <i class="fas fa-atom logo-icon"></i>
-        <div class="logo-text">SciMaster</div>
-        <span class="logo-sub">2015 성취기준 & 과고 면접</span>
+        <div class="logo-text">Sci<span>Master</span></div>
+        <span class="logo-sub">중학 과학 전과정 & 과고 면접</span>
       </div>
 
       <div class="header-actions">
-        <button id="themeToggle" class="theme-toggle-btn">
+        <button id="themeToggle" class="theme-toggle-btn" aria-label="테마 전환">
           <i class="fas fa-sun"></i> <span>모드</span>
         </button>
       </div>
     </div>
 
-    <nav class="main-nav">
+    <nav class="main-nav" aria-label="메인 탭 네비게이션">
       <button class="nav-tab active" data-view="view-concepts">
         <i class="fas fa-book-open"></i> 개념 탐색기
       </button>
       <button class="nav-tab" data-view="view-tracker">
-        <i class="fas fa-tasks"></i> 성취기준 트래커
+        <i class="fas fa-check-double"></i> 성취기준 트래커
       </button>
       <button class="nav-tab" data-view="view-quiz">
         <i class="fas fa-user-graduate"></i> 과학고 면접 퀴즈
       </button>
       <button class="nav-tab" data-view="view-misconceptions">
-        <i class="fas fa-lightbulb"></i> 오개념 타파
+        <i class="fas fa-lightbulb"></i> 오개념 타파 백과
       </button>
       <button class="nav-tab" data-view="view-simulators">
         <i class="fas fa-flask"></i> 계산기 & 시뮬레이터
@@ -48,22 +56,57 @@
     </nav>
   </header>
 
-  <!-- Main Container -->
+  <!-- Main Content Container -->
   <main class="main-content">
 
-    <!-- Hero Banner -->
+    <!-- Hero Banner with Stats Grid -->
     <section class="hero-banner glass-panel">
-      <div class="hero-text">
-        <h1>중학교 과학 1~3학년 개념 총정리 <br>& 과학고 면접 완벽 대시보드</h1>
-        <p>정확한 용어 정의부터 핵심 물리/화학 원리, 생물 분류 '예/아니요' 가지치기 검색표, 성취기준 체크리스트 및 실시간 과학 시뮬레이터까지 한번에 학습하세요.</p>
-        <div class="hero-badges">
-          <span class="hero-badge"><i class="fas fa-check-circle"></i> 2015 개정 교육과정</span>
-          <span class="hero-badge"><i class="fas fa-sitemap"></i> '예/아니요' 생물 검색표</span>
-          <span class="hero-badge"><i class="fas fa-brain"></i> 과학고 면접 완벽대비</span>
+      <div class="hero-content">
+        <div class="hero-pill-badge">
+          <i class="fas fa-certificate"></i> 2015 · 2022 개정 교육과정 표준 성취기준 완전 수록
         </div>
-      </div>
-      <div class="hero-img-box">
-        <img src="assets/hero.png" alt="SciMaster Hero Banner">
+
+        <h1 class="hero-title">
+          중학교 과학 1~3학년 <span class="gradient-text">개념 총정리</span><br>
+          & 과학고·영재교 심층 면접 대시보드
+        </h1>
+
+        <p class="hero-desc">
+          원소·원자·분자의 엄밀한 정의부터 물리 역학 공식, 생물 5계 이분법 가지치기 검색표, 단열 팽창 구름 생성,
+          그리고 전국 과학고 기출 기반 심층 면접 모범 답안까지 체계적으로 마스터하세요.
+        </p>
+
+        <!-- Dynamic Stat Cards Grid -->
+        <div class="hero-stats-grid">
+          <div class="stat-item-box">
+            <div class="stat-icon blue"><i class="fas fa-book"></i></div>
+            <div class="stat-info">
+              <span class="stat-num" id="statUnitCount">26개</span>
+              <span class="stat-label">중학 전범위 단원</span>
+            </div>
+          </div>
+          <div class="stat-item-box">
+            <div class="stat-icon indigo"><i class="fas fa-atom"></i></div>
+            <div class="stat-info">
+              <span class="stat-num" id="statConceptCount">100+</span>
+              <span class="stat-label">핵심 개념 완전 정의</span>
+            </div>
+          </div>
+          <div class="stat-item-box">
+            <div class="stat-icon green"><i class="fas fa-graduation-cap"></i></div>
+            <div class="stat-info">
+              <span class="stat-num" id="statQuizCount">30+</span>
+              <span class="stat-label">과고 심층 면접 문항</span>
+            </div>
+          </div>
+          <div class="stat-item-box">
+            <div class="stat-icon amber"><i class="fas fa-sliders-h"></i></div>
+            <div class="stat-info">
+              <span class="stat-num">4종</span>
+              <span class="stat-label">인터랙티브 시뮬레이터</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -71,37 +114,45 @@
     <section id="view-concepts" class="view-section active">
       <div class="controls-bar glass-panel">
         <div class="grade-btn-group">
-          <button class="grade-btn active" data-grade="all">전체</button>
+          <button class="grade-btn active" data-grade="all">전체 학년</button>
           <button class="grade-btn" data-grade="1">1학년</button>
           <button class="grade-btn" data-grade="2">2학년</button>
           <button class="grade-btn" data-grade="3">3학년</button>
         </div>
 
-        <select id="categorySelect" class="styled-select">
-          <option value="all">전체 분야 (물·화·생·지)</option>
-        </select>
+        <div class="controls-right-group">
+          <select id="categorySelect" class="styled-select" aria-label="분야 선택">
+            <option value="all">전체 분야 (물·화·생·지)</option>
+            <option value="물리">⚡ 물리 (Physics)</option>
+            <option value="화학">🧪 화학 (Chemistry)</option>
+            <option value="생명과학">🌿 생명과학 (Biology)</option>
+            <option value="지구과학">🌍 지구과학 (Earth Science)</option>
+          </select>
 
-        <div class="search-box">
-          <i class="fas fa-search"></i>
-          <input type="text" id="searchInput" placeholder="단원명, 개념, 키워드 검색...">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="단원명, 핵심 개념, 공식, 키워드 검색...">
+          </div>
         </div>
       </div>
 
       <div id="conceptContainer">
-        <!-- Dynamic Rendered via app.js -->
+        <!-- Dynamically rendered via app.js -->
       </div>
     </section>
 
     <!-- SECTION 2: 성취기준 트래커 View -->
     <section id="view-tracker" class="view-section">
       <div class="tracker-header-box glass-panel">
-        <h2><i class="fas fa-chart-pie"></i> 교육과정 성취기준 학습 진도율</h2>
-        <p style="color: var(--text-sub); margin-top: 0.3rem; font-size: 0.82rem;">학습한 성취기준을 체크하면 진행 상황이 자동으로 기록됩니다.</p>
+        <h2><i class="fas fa-tasks" style="color: var(--accent-primary);"></i> 교육과정 성취기준 학습 진도율</h2>
+        <p style="color: var(--text-secondary); margin-top: 0.35rem; font-size: 0.88rem;">
+          각 단원의 핵심 성취기준을 체크하면 진행 상황이 로컬에 자동 저장되어 학습 누적도를 직관적으로 확인할 수 있습니다.
+        </p>
 
         <div class="overall-progress-container">
           <div class="progress-label">
             <span>전체 성취기준 달성률</span>
-            <span id="overallProgressText">0% (0/0 개 달성)</span>
+            <span id="overallProgressText" style="color: var(--accent-primary);">0% (0/0 달성)</span>
           </div>
           <div class="progress-bar-bg">
             <div id="overallProgressBar" class="progress-bar-fill"></div>
@@ -110,19 +161,19 @@
 
         <div class="grade-stats-grid">
           <div class="g-stat-card">
-            <div class="progress-label"><span>🟢 1학년</span><span class="g-pct">0%</span></div>
+            <div class="progress-label"><span>🟢 1학년 과학</span><span class="g-pct">0%</span></div>
             <div class="progress-bar-bg">
               <div id="grade1Progress" class="progress-bar-fill"></div>
             </div>
           </div>
           <div class="g-stat-card">
-            <div class="progress-label"><span>🟡 2학년</span><span class="g-pct">0%</span></div>
+            <div class="progress-label"><span>🟡 2학년 과학</span><span class="g-pct">0%</span></div>
             <div class="progress-bar-bg">
               <div id="grade2Progress" class="progress-bar-fill"></div>
             </div>
           </div>
           <div class="g-stat-card">
-            <div class="progress-label"><span>🔴 3학년</span><span class="g-pct">0%</span></div>
+            <div class="progress-label"><span>🔴 3학년 과학</span><span class="g-pct">0%</span></div>
             <div class="progress-bar-bg">
               <div id="grade3Progress" class="progress-bar-fill"></div>
             </div>
@@ -139,15 +190,16 @@
     <section id="view-quiz" class="view-section">
       <div class="quiz-container">
         <div class="controls-bar glass-panel" style="width: 100%;">
-          <div class="grade-btn-group" style="grid-template-columns: 1fr auto;">
-            <select id="quizGradeSelect" class="styled-select" style="margin: 0;">
-              <option value="all">전체 학년 퀴즈</option>
+          <div style="display: flex; gap: 0.5rem; flex: 1;">
+            <select id="quizGradeSelect" class="styled-select" style="flex: 1;">
+              <option value="all">전체 학년 심층 면접 문제</option>
               <option value="1">1학년 과학고 면접</option>
               <option value="2">2학년 과학고 면접</option>
               <option value="3">3학년 과학고 면접</option>
             </select>
-            <button id="startQuizBtn" class="grade-btn active" style="padding: 0.45rem 0.8rem;"><i
-                class="fas fa-random"></i> 섞기</button>
+            <button id="startQuizBtn" class="grade-btn active" style="padding: 0.5rem 1rem;">
+              <i class="fas fa-random"></i> 섞기
+            </button>
           </div>
           <div class="quiz-counter" id="quizCounter">1 / 10</div>
         </div>
@@ -156,37 +208,40 @@
           <div id="flashcard" class="flashcard">
             <div class="card-face card-front">
               <div id="cardFrontQ">
-                <!-- Question -->
+                <!-- Question populated by app.js -->
               </div>
             </div>
             <div class="card-face card-back">
               <div id="cardBackA">
-                <!-- Answer -->
+                <!-- Answer populated by app.js -->
               </div>
             </div>
           </div>
         </div>
 
         <div class="quiz-controls">
-          <button id="prevQuizBtn" class="quiz-btn"><i class="fas fa-chevron-left"></i> 이전 문제</button>
-          <button id="flipBtn" class="quiz-btn"
-            style="background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); color: #fff;"><i
-              class="fas fa-sync-alt"></i> 정답 확인 (카드 뒤집기)</button>
-          <button id="nextQuizBtn" class="quiz-btn">다음 문제 <i class="fas fa-chevron-right"></i></button>
+          <button id="prevQuizBtn" class="quiz-btn"><i class="fas fa-chevron-left"></i> 이전 문항</button>
+          <button id="flipBtn" class="quiz-btn" style="background: var(--accent-primary); color: #fff;">
+            <i class="fas fa-sync-alt"></i> 모범 답안 확인 (카드 뒤집기)
+          </button>
+          <button id="nextQuizBtn" class="quiz-btn">다음 문항 <i class="fas fa-chevron-right"></i></button>
         </div>
       </div>
     </section>
 
-    <!-- SECTION 4: 오개념 타파 View -->
+    <!-- SECTION 4: 오개념 타파 백과 View -->
     <section id="view-misconceptions" class="view-section">
-      <div style="margin-bottom: 1.25rem; text-align: center;">
-        <h2><i class="fas fa-lightbulb" style="color: #f59e0b;"></i> 자주 틀리는 과학 오개념 타파 백과</h2>
-        <p style="color: var(--text-sub); margin-top: 0.3rem; font-size: 0.82rem;">학생들이 시험이나 면접에서 가장 많이 혼동하는 개념을 명확한 과학적
-          사실로 정리했습니다.</p>
+      <div style="margin-bottom: 2rem; text-align: center;">
+        <h2 style="font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em;">
+          <i class="fas fa-lightbulb" style="color: var(--accent-amber);"></i> 학생들이 가장 많이 헷갈리는 과학 오개념 타파 백과
+        </h2>
+        <p style="color: var(--text-secondary); margin-top: 0.4rem; font-size: 0.92rem;">
+          시험과 면접에서 함정으로 자주 출제되는 대표적 오개념을 올바른 과학적 원리로 명쾌하게 바로잡았습니다.
+        </p>
       </div>
 
       <div id="misconceptionContainer" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
-        <!-- Dynamic populated -->
+        <!-- Dynamically populated -->
       </div>
     </section>
 
@@ -194,43 +249,58 @@
     <section id="view-simulators" class="view-section">
       <div class="sim-grid">
 
-        <!-- Sim 4: 대화형 생물 '예/아니요' 가지치기 검색표 시뮬레이터 -->
+        <!-- Sim 1: 대화형 생물 '예/아니요' 가지치기 검색표 시뮬레이터 -->
         <div class="sim-card glass-panel">
-          <h3 class="sim-title"><i class="fas fa-sitemap"></i> 대화형 생물 5계 '예 / 아니요' 가지치기 검색표</h3>
-          <p style="font-size: 0.82rem; color: var(--text-sub);">질문에 [예] 또는 [아니요]를 클릭하여 대립되는 가지를 선택하며 생물의 계(Kingdom)를
-            분류해 보세요.</p>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <h3 class="sim-title"><i class="fas fa-sitemap"></i> 생물 분류 '예 / 아니요' 가지치기 검색표</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+                대립 형질 질문에 [예] 또는 [아니요]를 선택하며 생물의 계(Kingdom)를 체계적으로 분류해 보세요.
+              </p>
+            </div>
+            <select id="keyModeSelect" class="styled-select"
+              style="min-width: 140px; padding: 0.35rem 0.65rem; font-size: 0.8rem;">
+              <option value="kingdom">생물 5계 검색표</option>
+              <option value="vertebrate">척추동물 5강 검색표</option>
+            </select>
+          </div>
 
-          <div id="keyTreeContainer" class="key-tree-box glass-panel"
-            style="padding: 1.2rem; text-align: center; background: rgba(0,0,0,0.3); width: 100%;">
-            <div id="keyStepBadge" class="key-badge"
-              style="display:inline-block; padding:0.25rem 0.7rem; background:var(--accent-purple); color:#fff; border-radius:16px; font-weight:800; font-size:0.78rem; margin-bottom:0.6rem;">
-              1단계 질문</div>
-            <h3 id="keyQuestionText"
-              style="font-size: 1.05rem; font-weight: 800; margin-bottom: 1.2rem; color: var(--text-main);">"핵막이 존재하는
-              진핵세포 생물입니까?"</h3>
+          <div id="keyTreeContainer" class="key-tree-box">
+            <div id="keyStepBadge" class="key-badge">1단계 질문</div>
+            <h4 id="keyQuestionText"
+              style="font-size: 1.15rem; font-weight: 800; margin: 1rem 0; color: var(--text-primary); line-height: 1.5;">
+              "핵막이 존재하여 원자핵을 갖춘 진핵세포 생물입니까?"
+            </h4>
 
             <div class="key-buttons">
               <button id="keyYesBtn" class="quiz-btn"
-                style="background: var(--accent-cyan); color: #0f172a; font-weight: 800; font-size: 0.95rem;"><i
-                  class="fas fa-check-circle"></i> 예 (Yes)</button>
+                style="background: var(--accent-emerald); color: #fff; font-weight: 800;">
+                <i class="fas fa-check-circle"></i> 예 (Yes)
+              </button>
               <button id="keyNoBtn" class="quiz-btn"
-                style="background: #ef4444; color: #fff; font-weight: 800; font-size: 0.95rem;"><i
-                  class="fas fa-times-circle"></i> 아니요 (No)</button>
+                style="background: var(--accent-rose); color: #fff; font-weight: 800;">
+                <i class="fas fa-times-circle"></i> 아니요 (No)
+              </button>
             </div>
 
-            <div id="keyPathText" style="font-size: 0.78rem; color: var(--text-sub); margin-top: 0.6rem;">선택 경로: 시작 ➔
+            <div id="keyPathText" style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.8rem;">
+              선택 경로: 시작 ➔
             </div>
             <button id="keyResetBtn" class="grade-btn"
-              style="margin-top: 0.8rem; width: auto; display: inline-block; padding: 0.35rem 0.8rem;"><i
-                class="fas fa-undo"></i> 처음부터 다시 가지치기</button>
+              style="margin-top: 1rem; display: inline-flex; width: auto; padding: 0.4rem 1rem; align-items: center; gap: 0.4rem;">
+              <i class="fas fa-undo"></i> 처음부터 다시 분류
+            </button>
           </div>
         </div>
 
-        <!-- Sim 1: 역학적 에너지 보존 -->
+        <!-- Sim 2: 역학적 에너지 보존 시뮬레이터 -->
         <div class="sim-card glass-panel">
-          <h3 class="sim-title"><i class="fas fa-bolt"></i> 역학적 에너지 보존 시뮬레이터</h3>
-          <p style="font-size: 0.82rem; color: var(--text-sub);">질량, 높이, 속력을 조절하여 위치 에너지($E_p$)와 운동 에너지($E_k$)의 변화를
-            관찰하세요.</p>
+          <div>
+            <h3 class="sim-title"><i class="fas fa-bolt"></i> 역학적 에너지 보존 시뮬레이터</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+              질량($m$), 높이($h$), 속력($v$)을 조절하여 위치 에너지($E_p$)와 운동 에너지($E_k$)의 상호 전환을 관찰하세요.
+            </p>
+          </div>
 
           <div class="control-row">
             <label>질량 (m): <span id="massVal">2</span> kg</label>
@@ -238,34 +308,40 @@
           </div>
 
           <div class="control-row">
-            <label>높이 (h): <span id="simHeight">5</span> m</label>
+            <label>높이 (h): <span id="heightVal">5</span> m</label>
             <input type="range" id="simHeight" class="sim-slider" min="0" max="20" value="5" step="0.5">
           </div>
 
           <div class="control-row">
-            <label>속력 (v): <span id="simVel">0</span> m/s</label>
+            <label>속력 (v): <span id="velVal">0</span> m/s</label>
             <input type="range" id="simVel" class="sim-slider" min="0" max="20" value="0" step="0.5">
           </div>
 
           <div class="sim-result-box">
-            <div><strong>위치 에너지 ($E_p = 9.8 mh$):</strong> <span id="epVal"
-                style="color:#f59e0b; font-weight:800;">98</span> J</div>
-            <div><strong>운동 에너지 ($E_k = \frac{1}{2}mv^2$):</strong> <span id="ekVal"
-                style="color:#3b82f6; font-weight:800;">0</span> J</div>
-            <div style="border-top:1px solid var(--panel-border); padding-top:0.3rem;">
-              <strong>총 역학적 에너지 ($E$):</strong> <span id="totalEVal"
-                style="color:var(--accent-cyan); font-weight:800; font-size:1rem;">98</span> J
+            <div style="display: flex; justify-content: space-between;">
+              <strong>위치 에너지 ($E_p = 9.8 mh$):</strong>
+              <span id="epVal" style="color: var(--accent-amber); font-weight: 800;">98</span> J
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <strong>운동 에너지 ($E_k = \frac{1}{2}mv^2$):</strong>
+              <span id="ekVal" style="color: var(--accent-sky); font-weight: 800;">0</span> J
+            </div>
+            <div
+              style="border-top: 1px solid var(--border-subtle); padding-top: 0.5rem; display: flex; justify-content: space-between;">
+              <strong>총 역학적 에너지 ($E = E_p + E_k$):</strong>
+              <span id="totalEVal" style="color: var(--accent-primary); font-weight: 900; font-size: 1.05rem;">98</span>
+              J
             </div>
 
             <div class="energy-bars">
               <div class="bar-row">
-                <span>Ep</span>
+                <span style="width: 25px;">Ep</span>
                 <div class="bar-track">
                   <div id="epBar" class="bar-fill ep-fill"></div>
                 </div>
               </div>
               <div class="bar-row">
-                <span>Ek</span>
+                <span style="width: 25px;">Ek</span>
                 <div class="bar-track">
                   <div id="ekBar" class="bar-fill ek-fill"></div>
                 </div>
@@ -274,10 +350,14 @@
           </div>
         </div>
 
-        <!-- Sim 2: 포화 수증기량 & 상대 습도 -->
+        <!-- Sim 3: 포화 수증기량 & 상대 습도 계산기 -->
         <div class="sim-card glass-panel">
-          <h3 class="sim-title"><i class="fas fa-cloud-sun-rain"></i> 포화 수증기량 & 상대 습도 계산기</h3>
-          <p style="font-size: 0.82rem; color: var(--text-sub);">현재 기온과 실제 수증기량을 조절하여 이슬점 및 상대 습도를 산출합니다.</p>
+          <div>
+            <h3 class="sim-title"><i class="fas fa-cloud-sun-rain"></i> 포화 수증기량 & 상대 습도 계산기</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+              현재 기온과 실제 수증기량을 조절하여 포화 상태 여부와 상대 습도(%)를 실시간 계산합니다.
+            </p>
+          </div>
 
           <div class="control-row">
             <label>현재 기온 (t): <span id="tempVal">20</span> ℃</label>
@@ -285,25 +365,35 @@
           </div>
 
           <div class="control-row">
-            <label>실제 수증기량: <span id="vaporVal">10</span> g/kg</label>
-            <input type="range" id="simVapor" class="sim-slider" min="1" max="30" value="10" step="0.5">
+            <label>현재 실제 수증기량: <span id="vaporVal">10</span> g/kg</label>
+            <input type="range" id="simVapor" class="sim-slider" min="1" max="35" value="10" step="0.5">
           </div>
 
           <div class="sim-result-box">
-            <div><strong>현재 포화 수증기량:</strong> 약 <span id="calcSatVapor"
-                style="color:var(--accent-purple); font-weight:800;">14.7</span> g/kg</div>
-            <div><strong>상대 습도 계산:</strong> <span id="calcRelHumidity"
-                style="color:var(--accent-cyan); font-weight:900; font-size:1.15rem;">68</span> %</div>
-            <div style="margin-top:0.3rem;">
-              <span id="humidityStatus" class="status-tag unsaturated">불포화 상태</span>
+            <div style="display: flex; justify-content: space-between;">
+              <strong>현재 기온의 포화 수증기량:</strong>
+              <span>약 <span id="calcSatVapor" style="color: var(--accent-violet); font-weight: 800;">14.7</span>
+                g/kg</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong>상대 습도:</strong>
+              <span id="calcRelHumidity"
+                style="color: var(--accent-primary); font-weight: 900; font-size: 1.25rem;">68</span> %
+            </div>
+            <div style="margin-top: 0.4rem;">
+              <span id="humidityStatus" class="status-tag unsaturated">불포화 상태 (이슬점: 약 13.6 ℃)</span>
             </div>
           </div>
         </div>
 
-        <!-- Sim 3: 보일 & 샤를 법칙 기체 입자 시뮬레이터 -->
+        <!-- Sim 4: 보일 & 샤를 법칙 기체 입자 운동 Canvas -->
         <div class="sim-card glass-panel">
-          <h3 class="sim-title"><i class="fas fa-atom"></i> 보일 & 샤를 법칙 입자 운동 Canvas</h3>
-          <p style="font-size: 0.82rem; color: var(--text-sub);">온도(K)와 압력(atm)에 따른 기체 부피 및 입자 충돌 속도를 관찰하세요.</p>
+          <div>
+            <h3 class="sim-title"><i class="fas fa-atom"></i> 보일 & 샤를 법칙 기체 입자 Canvas</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+              절대온도($T$)와 압력($P$)에 따른 기체의 부피($V \propto T/P$) 변화 및 입자 충돌 속도를 관찰하세요.
+            </p>
+          </div>
 
           <div class="control-row">
             <label>기체 절대온도 (T): <span id="gasTempDisplay">300</span> K</label>
@@ -315,11 +405,11 @@
             <input type="range" id="gasPressure" class="sim-slider" min="0.5" max="4.0" value="1.0" step="0.1">
           </div>
 
-          <div style="font-size:0.82rem; font-weight:700; margin-bottom:0.3rem;">
-            상대적 기체 부피 ($V \propto T/P$): <span id="gasVolDisplay" style="color:var(--accent-cyan);">100%</span>
+          <div style="font-size: 0.86rem; font-weight: 800; margin-bottom: 0.3rem;">
+            상대적 기체 부피 ($V \propto T/P$): <span id="gasVolDisplay" style="color: var(--accent-sky);">100%</span>
           </div>
 
-          <canvas id="gasCanvas" width="320" height="160"></canvas>
+          <canvas id="gasCanvas" width="360" height="170"></canvas>
         </div>
 
       </div>
@@ -327,8 +417,9 @@
 
   </main>
 
+  <!-- Clean App Footer -->
   <footer class="app-footer">
-    <p>© 2026 SciMaster - 중학교 과학 1~3학년 개념 총정리 & 과학고 면접 마스터 | 2015 개정 교육과정 기준</p>
+    <p>© 2026 SciMaster - 중학교 과학 1~3학년 개념 총정리 & 과학고·영재교 면접 마스터 | 2015 · 2022 개정 교육과정 기준</p>
   </footer>
 
   <!-- App JavaScript Database & Logic -->
